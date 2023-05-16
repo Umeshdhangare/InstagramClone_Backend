@@ -1,12 +1,14 @@
-const express = require('express');
-const postRouter = express.Router();
+var express = require('express');
+var postRouter = express.Router();
 
-const Post = require('../models/posts');
+var authenticate = require('../middleware/authenticate');
+
+var Posts = require('../models/posts');
 
 postRouter.route('/')
 .get((req,res,next) => {
-    Post.find({})
-        // .populate('postedBy')
+    Posts.find({})
+        .populate('postedBy', 'name email')
         // .populate('comments.postedBy')
         .then((posts) => {
             res.statusCode = 200;
@@ -15,14 +17,16 @@ postRouter.route('/')
         }, (err) => next(err))
         .catch((err) => next(err));
 })
-.post((req,res,next) => {
-    const {title, body} = req.body;
+.post(authenticate.verifyUser, (req,res,next) => {
+    var {title, body} = req.body;
     if(!title || !body){
-        res.sendStatus(422).json({message: "All fields are required"});
+        res.statusCode = 422;
+        res.json({message: "All fields are required"});
     }
-    const newPost = new Post({
+    var newPost = new Posts({
         title,
-        body
+        body,
+        postedBy: req.user._id
     });
 
     newPost.save()

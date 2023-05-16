@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const { ObjectId } = mongoose.Schema.Types;
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+var { ObjectId } = mongoose.Schema.Types;
 
-const postSchema = new Schema({
+var postSchema = new Schema({
     title: {
         type: String,
         required: true
@@ -17,10 +17,8 @@ const postSchema = new Schema({
         required: true
     },
     postedBy: {
-        // type: ObjectId,
-        // ref: 'User',
-        type:String,
-        default:'Umesh',
+        type: ObjectId,
+        ref: 'User',
         required: true
     }
     // likes:[
@@ -41,4 +39,4 @@ const postSchema = new Schema({
     // ]
 });
 
-module.exports = Post = mongoose.model('Post', postSchema);
+module.exports = Posts = mongoose.model('Post', postSchema);

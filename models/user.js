@@ -1,15 +1,16 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const { ObjetId } = mongoose.Schema.Types;
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
+var { ObjectId } = mongoose.Schema.Types;
 
-const userSchema = new Schema({
+var userSchema = new Schema({
     name: {
         type: String,
         required: true
     },
     email: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     password: {
         type: String,
@@ -17,16 +18,16 @@ const userSchema = new Schema({
     },
     followers: [
         {
-            type: ObjetId,
+            type: ObjectId,
             ref: 'User'
         }
     ],
     following: [
         {
-            type: ObjetId,
+            type: ObjectId,
             ref:'User' 
         }
     ]
 });
 
-module.exports = User = mongoose.model('User', userSchema);
+module.exports = Users = mongoose.model('User', userSchema);
