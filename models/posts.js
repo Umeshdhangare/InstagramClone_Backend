@@ -17,26 +17,28 @@ const postSchema = new Schema({
         required: true
     },
     postedBy: {
-        type: ObjectId,
-        ref: 'User',
+        // type: ObjectId,
+        // ref: 'User',
+        type:String,
+        default:'Umesh',
         required: true
-    },
-    likes:[
-        {
-            type: ObjectId,
-            ref: 'User'
-        }
-    ],
-    comments: [
-        {
-            text: String,
-            postedBy: {
-                type: ObjectId,
-                ref: 'User',
-                required: true
-            }
-        }
-    ]
+    }
+    // likes:[
+    //     {
+    //         type: ObjectId,
+    //         ref: 'User'
+    //     }
+    // ],
+    // comments: [
+    //     {
+    //         text: String,
+    //         postedBy: {
+    //             type: ObjectId,
+    //             ref: 'User',
+    //             required: true
+    //         }
+    //     }
+    // ]
 });
 
 module.exports = Post = mongoose.model('Post', postSchema);
