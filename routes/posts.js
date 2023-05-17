@@ -5,11 +5,13 @@ var authenticate = require('../middleware/authenticate');
 
 var Posts = require('../models/posts');
 
+// get and post on /posts
 postRouter.route('/')
 .get((req,res,next) => {
     Posts.find({})
-        .populate('postedBy', 'name email')
-        // .populate('comments.postedBy')
+        .populate('postedBy', 'name')
+        .populate('comments.postedBy', 'name')
+        .populate('likes','name')
         .then((posts) => {
             res.statusCode = 200;
             res.setHeader('Content-Type','application/json');
@@ -36,6 +38,79 @@ postRouter.route('/')
             res.json(post);
         }, (err) => next(err))
         .catch((err) => next(err));
+});
+
+// GET , POST and DELETE on /posts/id
+postRouter.route('/:id')
+.get((req,res,next) => {
+    Posts.findById(req.params.id)
+        .populate('postedBy', 'name')
+        .populate('comments.postedBy', 'name')
+        .populate('likes', 'name')
+        .then((post) => {
+            res.statusCode = 200;
+            res.json(post);
+        })
+        .catch((err) => next(err));
+})
+.post((req,res) => {
+    res.statusCode = 403;
+    res.send("POST method not supported on this endpoint");
+})
+.delete(authenticate.verifyUser, (req,res,next) => {
+    Posts.findById(req.params.id)
+        .then((post) => {
+            if(!post){
+                res.statusCode = 404;
+                res.send("No post available!");
+            }
+
+            Posts.deleteOne({_id: req.params.id})
+                .then((post) => {
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type','application/json');
+                    res.json({message: "Post deleted successfully!"});
+                })
+                .catch((err) => next(err));
+        })
+        .catch((err) => next(err));
+});
+
+// POST Likes and comments on /posts/id/likes and /posts/id/comments respectively
+postRouter.route('/:id/likes')
+.post(authenticate.verifyUser, (req,res,next) => {
+    Posts.findByIdAndUpdate(req.params.id, {
+        $push : {likes: req.user._id}
+    }, {
+        new: true
+    })
+    .exec()
+    .populate('likes', 'name')
+    .then((result) => {
+        res.statusCode = 200;
+        res.json(result);
+    })   
+    .catch((err) => next(err)); 
+})
+
+postRouter.post('/:id/comment', authenticate.verifyUser, (req,res,next) => {
+    var comment = {
+        text: req.body.text,
+        postedBy: req.user._id
+    };
+
+    Posts.findByIdAndUpdate(req.params.id,{
+        $push: {comments: comment}
+    }, {
+        new: true
+    })
+    .exec()
+    .populate('comments.postedBy', 'name')
+    .then((result) => {
+        res.statusCode = 200;
+        res.json(result);
+    })
+    .catch((err) => next(err));
 });
 
 module.exports = postRouter;

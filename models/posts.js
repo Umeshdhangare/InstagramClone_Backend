@@ -20,23 +20,23 @@ var postSchema = new Schema({
         type: ObjectId,
         ref: 'User',
         required: true
-    }
-    // likes:[
-    //     {
-    //         type: ObjectId,
-    //         ref: 'User'
-    //     }
-    // ],
-    // comments: [
-    //     {
-    //         text: String,
-    //         postedBy: {
-    //             type: ObjectId,
-    //             ref: 'User',
-    //             required: true
-    //         }
-    //     }
-    // ]
+    },
+    likes:[
+        {
+            type: ObjectId,
+            ref: 'User'
+        }
+    ],
+    comments: [
+        {
+            text: String,
+            postedBy: {
+                type: ObjectId,
+                ref: 'User',
+                required: true
+            }
+        }
+    ]
 });
 
 module.exports = Posts = mongoose.model('Post', postSchema);
