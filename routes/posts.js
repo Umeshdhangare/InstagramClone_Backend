@@ -80,20 +80,35 @@ postRouter.route('/:id')
 postRouter.route('/:id/likes')
 .post(authenticate.verifyUser, (req,res,next) => {
     Posts.findByIdAndUpdate(req.params.id, {
-        $push : {likes: req.user._id}
+        $push : {likes: req.user.id}
     }, {
         new: true
     })
-    .exec()
     .populate('likes', 'name')
+    .exec()
     .then((result) => {
         res.statusCode = 200;
         res.json(result);
     })   
     .catch((err) => next(err)); 
 })
+.delete(authenticate.verifyUser, (req,res,next) => {
+    Posts.findByIdAndUpdate(req.params.id, {
+        $pull: {likes: req.user.id}
+    }, {
+        new: true
+    })
+    .populate('likes', 'name')
+    .exec()
+    .then((result) => {
+        res.statusCode = 200;
+        res.json(result);
+    })
+    .catch((err) => next(err));
+});
 
-postRouter.post('/:id/comment', authenticate.verifyUser, (req,res,next) => {
+postRouter.route('/:id/comment')
+.post(authenticate.verifyUser, (req,res,next) => {
     var comment = {
         text: req.body.text,
         postedBy: req.user._id
@@ -104,13 +119,36 @@ postRouter.post('/:id/comment', authenticate.verifyUser, (req,res,next) => {
     }, {
         new: true
     })
-    .exec()
     .populate('comments.postedBy', 'name')
+    .exec()
     .then((result) => {
         res.statusCode = 200;
         res.json(result);
     })
     .catch((err) => next(err));
+})
+.put(authenticate.verifyUser, (req,res,next) => {
+    var updatedComment = req.body.text;
+
+    Posts.findById(req.params.id)
+        .then((post)=>{
+            for(let comment of post.comments){
+                if(comment.postedBy.toString() === req.user.id.toString()){
+                    comment.text = updatedComment;
+                    break;
+                }
+            }
+            post.save()
+                .then((savedPost) => {
+                    return Posts.populate(savedPost, {path: 'comments.postedBy', select:'name'})
+                })
+                .then((updatedPost) => {
+                    res.statusCode  = 200;
+                    res.json(updatedPost);
+                })
+                .catch((err) => next(err));
+        })
+        .catch((err) => next(err));
 });
 
 module.exports = postRouter;
