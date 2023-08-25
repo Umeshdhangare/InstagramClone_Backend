@@ -1,34 +1,33 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var mongoose = require('mongoose');
+// const createError = require('http-errors');
+const express = require('express');
+const cors = require("cors");
+const connectDB = require("./config");
+// const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 
-var mongoUrl = require('./config').MONGOURI;
+const userRoute = require("./routes/userRoute");
+const postRoute = require("./routes/postRoute");
+const commentRoute = require("./routes/commentRoute");
 
-mongoose.connect(mongoUrl).then(() => {
-  console.log('Connected to the server succesfully');
-});
-
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var postRouter = require('./routes/posts');
-
-var app = express();
+const app = express();
+connectDB();
 
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
-
+app.use(cors());
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 // app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/posts', postRouter);
+app.use("/api/user", userRoute);
+app.use("/api/post", postRoute);
+app.use("/api/comment", commentRoute);
+app.use("/", (req, res) => {
+  res.send(`${req.method} Route ${req.path} not found!`);
+})
 
 // catch 404 and forward to error handler
 // app.use(function(req, res, next) {

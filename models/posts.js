@@ -3,40 +3,15 @@ var Schema = mongoose.Schema;
 var { ObjectId } = mongoose.Schema.Types;
 
 var postSchema = new Schema({
-    title: {
-        type: String,
-        required: true
-    },
-    body: {
-        type: String,
-        required: true
-    },
-    photo: {
-        type: String,
-        default: 'No Photo',
-        required: true
-    },
-    postedBy: {
-        type: ObjectId,
-        ref: 'User',
-        required: true
-    },
-    likes:[
-        {
-            type: ObjectId,
-            ref: 'User'
-        }
-    ],
-    comments: [
-        {
-            text: String,
-            postedBy: {
-                type: ObjectId,
-                ref: 'User',
-                required: true
-            }
-        }
-    ]
-});
+    user: {type: ObjectId, ref: "User"},
+    description: { type: String, max:500},
+    imgurl: {type: String},
+    likes:[{type: ObjectId, ref: "User"}],
+    comments: [{ type: ObjectId, ref: "Comment"}]
+    }, 
+    {
+    timestamps: true
+    }
+);
 
-module.exports = Posts = mongoose.model('Post', postSchema);
+module.exports = mongoose.model('Post', postSchema);
